@@ -1,49 +1,50 @@
 {
-    "name": "windows-rs.web.features",
-    "version": "0.1.0",
-    "private": true,
-    "homepage": ".",
-    "dependencies": {
-        "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-        "@fluentui/react-components": "^9.45.0",
-        "@fontsource/fira-sans": "^5.0.18",
-        "@types/node": "^16.18.69",
-        "@types/react": "^18.2.47",
-        "@types/react-dom": "^18.2.18",
-        "@typescript-eslint/eslint-plugin": "^6.19.1",
-        "@typescript-eslint/parser": "^6.19.1",
-        "eslint": "^8.56.0",
-        "eslint-plugin-react": "^7.33.2",
-        "gh-pages": "^6.1.1",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-router-dom": "^6.22.1",
-        "react-scripts": "^5.0.1",
-        "typescript": "^4.9.5"
-    },
-    "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "eject": "react-scripts eject"
-    },
-    "eslintConfig": {
-        "extends": [
-            "react-app"
-        ]
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 3 chrome version",
-            "last 3 firefox version",
-            "last 3 safari version"
-        ]
-    },
-    "devDependencies": {
-        "eslint-plugin-react-hooks": "^4.6.0"
-    }
+  "name": "windows-rs.web.features",
+  "version": "0.1.1",
+  "private": true,
+  "homepage": ".",
+  "dependencies": {
+    "@fluentui/react-components": "^9.45.0",
+    "@fluentui/react-theme": "^9.1.22",
+    "@fontsource/fira-sans": "^5.0.18",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.1"
+  },
+  "scripts": {
+    "start": "webpack serve --mode development",
+    "build": "webpack --mode production"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.15.0",
+    "@types/dotenv-webpack": "^7.0.8",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.14.0",
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.0",
+    "dotenv-expand": "^11.0.7",
+    "dotenv-webpack": "^8.1.0",
+    "eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-webpack-plugin": "^4.2.0",
+    "gh-pages": "^6.2.0",
+    "globals": "^15.12.0",
+    "postcss": "^8.4.49",
+    "postcss-loader": "^8.1.1",
+    "react-refresh": "^0.14.2",
+    "resolve": "^1.22.8",
+    "resolve-url-loader": "^5.0.0",
+    "sass-loader": "^16.0.3",
+    "source-map-loader": "^5.0.0",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.3",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0",
+    "webpack-manifest-plugin": "^5.0.0"
+  }
 }

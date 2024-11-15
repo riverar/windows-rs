@@ -10,20 +10,12 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  pull_request:
-    paths:
-      - 'web/**'
   push:
-    paths:
-      - 'web/**'
-    branches:
-      - master
   workflow_dispatch:
 
 jobs:
   web:
     name: web
-    if: github.repository == 'microsoft/windows-rs'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,7 +24,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: current
+          node-version: '23.1'
 
       - name: Install dependencies
         run: npm install
