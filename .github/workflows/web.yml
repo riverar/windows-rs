@@ -23,41 +23,68 @@ on:
 jobs:
   web:
     name: web
-    if: github.repository == 'microsoft/windows-rs'
+    if: github.repository == 'riverar/windows-rs'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout (current)
         uses: actions/checkout@v4
+        with:
+          path: current
+
+      - name: Checkout (master)
+        if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: master
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '23.1' # Temporary: https://github.com/nodejs/node/issues/55826
 
-      - name: Install dependencies
-        run: npm install
-        working-directory: web/features
-
-      - name: Build project
-        run: npm run build
-        working-directory: web/features
-
-      - name: Stage website (production)
+      - name: Build production site
+        if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
+        working-directory: master/web/features
         run: |
-          mkdir -p web/build/features
-          cp -r web/features/build/* web/build/features
-        if: github.event_name != 'pull_request'
+          npm ci
+          npm run build
 
-      - name: Stage website (preview)
-        run: |
-          mkdir -p web/build/preview/${{ github.event.pull_request.number }}/features
-          cp -r web/features/build/* web/build/preview/${{ github.event.pull_request.number }}/features
+      - name: Build preview site
         if: github.event_name == 'pull_request'
+        working-directory: current/web/features
+        run: |
+          npm ci
+          npm run build
 
-      - name: Upload artifact
+      - name: Download existing pages
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: existing-pages
+        continue-on-error: true
+
+      - name: Prepare deployment
+        run: |
+          mkdir -p final-site
+          
+          if [ -d "existing-pages" ]; then
+            cp -r existing-pages/* final-site/
+          fi
+          
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            cp -r master/web/features/build/* final-site/
+          fi
+          
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            mkdir -p final-site/preview/pr-${{ github.event.number }}
+            cp -r current/web/features/build/* final-site/preview/pr-${{ github.event.number }}/
+          fi
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: web/build
+          path: final-site
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
