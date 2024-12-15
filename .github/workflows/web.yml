@@ -1,9 +1,7 @@
 name: web
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: 'pages'
@@ -13,6 +11,7 @@ on:
   pull_request:
     paths:
       - 'web/**'
+    types: [opened, synchronize, reopened, closed]
   push:
     paths:
       - 'web/**'
@@ -26,65 +25,54 @@ jobs:
     if: github.repository == 'riverar/windows-rs'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (current)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           path: current
-
-      - name: Checkout (master)
-        if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          ref: master
-          path: master
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '23.1' # Temporary: https://github.com/nodejs/node/issues/55826
 
-      - name: Build production site
-        if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
-        working-directory: master/web/features
-        run: |
-          npm ci
-          npm run build
+      # Features
 
-      - name: Build preview site
-        if: github.event_name == 'pull_request'
+      - name: Build features site
         working-directory: current/web/features
         run: |
           npm ci
           npm run build
 
-      - name: Download existing pages
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          path: existing-pages
-        continue-on-error: true
+      # /Features
 
-      - name: Prepare deployment
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Update gh-pages
         run: |
-          mkdir -p final-site
-          
-          if [ -d "existing-pages" ]; then
-            cp -r existing-pages/* final-site/
-          fi
-          
-          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            cp -r master/web/features/build/* final-site/
-          fi
+          cd gh-pages
           
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            mkdir -p final-site/preview/pr-${{ github.event.number }}
-            cp -r current/web/features/build/* final-site/preview/pr-${{ github.event.number }}/
+            if [ "${{ github.event.action }}" == "closed" ]; then
+              rm -rf features/preview/pr-${{ github.event.number }}
+            else
+              mkdir -p features/preview/pr-${{ github.event.number }}
+              rm -rf features/preview/pr-${{ github.event.number }}/*
+              cp -r ../current/web/features/build/* features/preview/pr-${{ github.event.number }}/
+            fi
           fi
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: final-site
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            mkdir -p features
+            rm -rf features/*
+            cp -r ../current/web/features/build/* features/
+          fi
 
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update from ${{ github.sha }}" && git push)
