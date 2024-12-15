@@ -3,76 +3,78 @@ name: web
 permissions:
   contents: write
 
-concurrency:
-  group: 'pages'
-  cancel-in-progress: false
-
 on:
   pull_request:
-    paths:
-      - 'web/**'
+    paths: [web/**]
     types: [opened, synchronize, reopened, closed]
   push:
-    paths:
-      - 'web/**'
-    branches:
-      - master
+    paths: [web/**]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
   web:
-    name: web
     if: github.repository == 'riverar/windows-rs'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           path: current
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '23.1' # Temporary: https://github.com/nodejs/node/issues/55826
 
-      # Features
-
-      - name: Build features site
-        working-directory: current/web/features
+      - name: Build sites
+        shell: pwsh
         run: |
-          npm ci
-          npm run build
+          cd current/web
+          $sites = Get-ChildItem -Directory
+          foreach ($site in $sites) {
+            Write-Host "Building $($site.Name)"
+            ./build.ps1 $site.Name
+          }
 
-      # /Features
-
-      - name: Checkout gh-pages
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
       - name: Update gh-pages
+        shell: pwsh
         run: |
           cd gh-pages
-          
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            if [ "${{ github.event.action }}" == "closed" ]; then
-              rm -rf features/preview/pr-${{ github.event.number }}
-            else
-              mkdir -p features/preview/pr-${{ github.event.number }}
-              rm -rf features/preview/pr-${{ github.event.number }}/*
-              cp -r ../current/web/features/build/* features/preview/pr-${{ github.event.number }}/
-            fi
-          fi
 
-          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            mkdir -p features
-            rm -rf features/*
-            cp -r ../current/web/features/build/* features/
-          fi
+          $sites = Get-ChildItem ../current/web -Directory
+          foreach ($site in $sites) {
+              Write-Host "Deploying $($site.Name)"
+              
+              if ("${{ github.event_name }}" -eq "pull_request") {
+                  if ("${{ github.event.action }}" -eq "closed") {
+                      Remove-Item -Recurse -Force -ErrorAction Ignore "$($site.Name)/preview/pr-${{ github.event.number }}"
+                  } else {
+                      if (Test-Path "$($site.FullName)/build") {
+                          $previewPath = "$($site.Name)/preview/pr-${{ github.event.number }}"
+                          New-Item -ItemType Directory -Force $previewPath | Out-Null
+                          Remove-Item -Recurse -Force -ErrorAction Ignore "$previewPath/*"
+                          Copy-Item "$($site.FullName)/build/*" $previewPath -Recurse -Force
+                      }
+                  }
+              } elseif ("${{ github.ref }}" -eq "refs/heads/master") {
+                  if (Test-Path "$($site.FullName)/build") {
+                      New-Item -ItemType Directory -Force $site.Name | Out-Null
+                      Get-ChildItem "$($site.Name)/*" -Exclude "preview" | Remove-Item -Recurse -Force -ErrorAction Ignore
+                      Copy-Item "$($site.FullName)/build/*" $site.Name -Recurse -Force
+                  }
+              }
+          }
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add .
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update from ${{ github.sha }}" && git push)
+                    
+          $status = git status --porcelain
+          if ($status) {
+              git add .
+              git commit -m "Update from ${{ github.sha }}"
+              git push
+          }
