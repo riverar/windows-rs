@@ -1,90 +1,80 @@
 name: web
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: 'pages'
-  cancel-in-progress: false
+  contents: write
 
 on:
   pull_request:
-    paths:
-      - 'web/**'
+    paths: [web/**]
+    types: [opened, synchronize, reopened, closed]
   push:
-    paths:
-      - 'web/**'
-    branches:
-      - master
+    paths: [web/**]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
   web:
-    name: web
     if: github.repository == 'riverar/windows-rs'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (current)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           path: current
 
-      - name: Checkout (master)
-        if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          ref: master
-          path: master
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '23.1' # Temporary: https://github.com/nodejs/node/issues/55826
 
-      - name: Build production site
-        if: github.ref == 'refs/heads/master' || github.event_name == 'pull_request'
-        working-directory: master/web/features
+      - name: Build sites
+        shell: pwsh
         run: |
-          npm ci
-          npm run build
+          cd current/web
+          $sites = Get-ChildItem -Directory
+          foreach ($site in $sites) {
+            Write-Host "Building $($site.Name)"
+            ./build.ps1 $site.Name
+          }
 
-      - name: Build preview site
-        if: github.event_name == 'pull_request'
-        working-directory: current/web/features
-        run: |
-          npm ci
-          npm run build
-
-      - name: Download existing pages
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
         with:
-          name: github-pages
-          path: existing-pages
-        continue-on-error: true
+          ref: gh-pages
+          path: gh-pages
 
-      - name: Prepare deployment
+      - name: Update gh-pages
+        shell: pwsh
         run: |
-          mkdir -p final-site
-          
-          if [ -d "existing-pages" ]; then
-            cp -r existing-pages/* final-site/
-          fi
-          
-          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            cp -r master/web/features/build/* final-site/
-          fi
-          
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            mkdir -p final-site/preview/pr-${{ github.event.number }}
-            cp -r current/web/features/build/* final-site/preview/pr-${{ github.event.number }}/
-          fi
+          cd gh-pages
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: final-site
+          $sites = Get-ChildItem ../current/web -Directory
+          foreach ($site in $sites) {
+              Write-Host "Deploying $($site.Name)"
+              
+              if ("${{ github.event_name }}" -eq "pull_request") {
+                  if ("${{ github.event.action }}" -eq "closed") {
+                      Remove-Item -Recurse -Force -ErrorAction Ignore "$($site.Name)/preview/pr-${{ github.event.number }}"
+                  } else {
+                      if (Test-Path "$($site.FullName)/build") {
+                          $previewPath = "$($site.Name)/preview/pr-${{ github.event.number }}"
+                          New-Item -ItemType Directory -Force $previewPath | Out-Null
+                          Remove-Item -Recurse -Force -ErrorAction Ignore "$previewPath/*"
+                          Copy-Item "$($site.FullName)/build/*" $previewPath -Recurse -Force
+                      }
+                  }
+              } elseif ("${{ github.ref }}" -eq "refs/heads/master") {
+                  if (Test-Path "$($site.FullName)/build") {
+                      New-Item -ItemType Directory -Force $site.Name | Out-Null
+                      Get-ChildItem "$($site.Name)/*" -Exclude "preview" | Remove-Item -Recurse -Force -ErrorAction Ignore
+                      Copy-Item "$($site.FullName)/build/*" $site.Name -Recurse -Force
+                  }
+              }
+          }
 
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+                    
+          $status = git status --porcelain
+          if ($status) {
+              git add .
+              git commit -m "Update from ${{ github.sha }}"
+              git push
+          }
