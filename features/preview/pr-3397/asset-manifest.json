@@ -1,0 +1,29 @@
+{
+  "files": {
+    "main.css": "./static/css/main.43a2f43d.css",
+    "main.js": "./static/js/main.6b8b3340.js",
+    "static/js/965.112b721b.chunk.js": "./static/js/965.112b721b.chunk.js",
+    "static/media/fira-sans-latin-ext-400-normal.woff2": "./static/media/fira-sans-latin-ext-400-normal.52a497743ad464bd5589.woff2",
+    "static/media/fira-sans-latin-ext-400-normal.woff": "./static/media/fira-sans-latin-ext-400-normal.4ba66187964543dda525.woff",
+    "static/media/fira-sans-latin-400-normal.woff2": "./static/media/fira-sans-latin-400-normal.c695d16a680a5cbebd3d.woff2",
+    "static/media/fira-sans-latin-400-normal.woff": "./static/media/fira-sans-latin-400-normal.de8a0a32fb5cf7629ed9.woff",
+    "static/media/fira-sans-cyrillic-ext-400-normal.woff2": "./static/media/fira-sans-cyrillic-ext-400-normal.d68444561f969b0ec505.woff2",
+    "static/media/fira-sans-cyrillic-ext-400-normal.woff": "./static/media/fira-sans-cyrillic-ext-400-normal.ba06c9dac31b8ab02776.woff",
+    "static/media/fira-sans-greek-400-normal.woff2": "./static/media/fira-sans-greek-400-normal.fc6dfdfac47f5b7efb29.woff2",
+    "static/media/fira-sans-greek-400-normal.woff": "./static/media/fira-sans-greek-400-normal.17117bf2661db5e37c67.woff",
+    "static/media/fira-sans-cyrillic-400-normal.woff2": "./static/media/fira-sans-cyrillic-400-normal.ff71c63325bee1312092.woff2",
+    "static/media/fira-sans-cyrillic-400-normal.woff": "./static/media/fira-sans-cyrillic-400-normal.810ffcd142e7073e9c24.woff",
+    "static/media/fira-sans-vietnamese-400-normal.woff2": "./static/media/fira-sans-vietnamese-400-normal.d03d9031be4f9fe24a88.woff2",
+    "static/media/fira-sans-greek-ext-400-normal.woff2": "./static/media/fira-sans-greek-ext-400-normal.2a7a57f95a4f314a9945.woff2",
+    "static/media/fira-sans-greek-ext-400-normal.woff": "./static/media/fira-sans-greek-ext-400-normal.0632e95f661cec655e24.woff",
+    "static/media/fira-sans-vietnamese-400-normal.woff": "./static/media/fira-sans-vietnamese-400-normal.04a5d0467eb9ab4523e7.woff",
+    "index.html": "./index.html",
+    "main.43a2f43d.css.map": "./static/css/main.43a2f43d.css.map",
+    "main.6b8b3340.js.map": "./static/js/main.6b8b3340.js.map",
+    "965.112b721b.chunk.js.map": "./static/js/965.112b721b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.43a2f43d.css",
+    "static/js/main.6b8b3340.js"
+  ]
+}
