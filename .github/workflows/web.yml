@@ -15,7 +15,7 @@ on:
 
 jobs:
   web:
-    if: github.repository == 'microsoft/windows-rs'
+    if: github.repository == 'riverar/windows-rs'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
