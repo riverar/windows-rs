@@ -35,20 +35,11 @@ jobs:
       - name: Install Rustup
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
-           & .\rustup-init.exe --default-toolchain none --profile=minimal -y
-          "$env:USERPROFILE\.cargo\bin" | Out-File -Append -Encoding ascii $env:GITHUB_PATH
-          "CARGO_HOME=$env:USERPROFILE\.cargo" | Out-File -Append -Encoding ascii $env:GITHUB_ENV
-        if: ${{ matrix.runner == 'windows-11-arm' }}
-      - name: Update toolchain
-        run: rustup update --no-self-update ${{ matrix.version }} && rustup default ${{ matrix.version }}-${{ matrix.host }}
-      - name: Add toolchain target
-        run: rustup target add ${{ matrix.target }}
-      - name: Install fmt, clippy
-        run: rustup component add clippy rustfmt
-      - name: Fix environment
-        uses: ./.github/actions/fix-environment"#
-    .to_string();
+          ls "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\arm64\midlrt.exe"
+          ls "${env:ProgramFiles(x86)}"
+          cmd /c ver
+          wmic os get Caption,CSDVersion /value
+    "#.to_string();
 
     // This unrolling is required since "cargo test --all" consumes too much memory for the GitHub hosted runners
     // and the occasional "cargo clean" is required to avoid running out of disk space in the same runners.

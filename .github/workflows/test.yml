@@ -17,36 +17,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - version: stable
-            host: x86_64-pc-windows-msvc
-            target: x86_64-pc-windows-msvc
-            runner: windows-2022
-            etc:
-          - version: nightly
-            host: x86_64-pc-windows-msvc
-            target: i686-pc-windows-msvc
-            runner: windows-2022
-            etc:
-          - version: nightly
-            host: x86_64-pc-windows-gnu
-            target: x86_64-pc-windows-gnu
-            runner: windows-2022
-            etc:
-          - version: stable
-            host: x86_64-pc-windows-gnu
-            target: i686-pc-windows-gnu
-            runner: windows-2022
-            etc:
-          - version: stable
-            host: x86_64-pc-windows-msvc
-            target: aarch64-pc-windows-msvc
-            runner: windows-2022
-            etc: --no-run
-          - version: nightly
-            host: x86_64-pc-windows-msvc
-            target: aarch64-pc-windows-msvc
-            runner: windows-2022
-            etc: --no-run
           - version: nightly
             host: aarch64-pc-windows-msvc
             target: aarch64-pc-windows-msvc
@@ -61,19 +31,11 @@ jobs:
       - name: Install Rustup
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
-           & .\rustup-init.exe --default-toolchain none --profile=minimal -y
-          "$env:USERPROFILE\.cargo\bin" | Out-File -Append -Encoding ascii $env:GITHUB_PATH
-          "CARGO_HOME=$env:USERPROFILE\.cargo" | Out-File -Append -Encoding ascii $env:GITHUB_ENV
-        if: ${{ matrix.runner == 'windows-11-arm' }}
-      - name: Update toolchain
-        run: rustup update --no-self-update ${{ matrix.version }} && rustup default ${{ matrix.version }}-${{ matrix.host }}
-      - name: Add toolchain target
-        run: rustup target add ${{ matrix.target }}
-      - name: Install fmt, clippy
-        run: rustup component add clippy rustfmt
-      - name: Fix environment
-        uses: ./.github/actions/fix-environment
+          ls "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\arm64\midlrt.exe"
+          ls "${env:ProgramFiles(x86)}"
+          cmd /c ver
+          wmic os get Caption,CSDVersion /value
+    
       - name: Clean
         run:  cargo clean
       - name: Test cppwinrt
