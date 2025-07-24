@@ -72,6 +72,12 @@ jobs:
         run:  cargo clippy -p sample_enum_windows_sys
       - name: Check sample_file_dialogs
         run:  cargo clippy -p sample_file_dialogs
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+                
       - name: Check sample_json_validator
         run:  cargo clippy -p sample_json_validator
       - name: Check sample_json_validator_client
