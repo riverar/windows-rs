@@ -60,6 +60,11 @@ jobs:
           name: libs
           path: crates/targets/*/lib/*
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+          
       - name: Check diff
         shell: bash
         run: |
